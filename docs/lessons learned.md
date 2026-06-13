@@ -18,3 +18,11 @@
 - Exam-relevant: restricting *which* models a team may use is still done via
   IAM policies / SCPs — the default just flipped from deny-until-enabled to
   allow-until-restricted.
+  ## Phase 6 — Knowledge Base creation
+- S3 Vectors over OpenSearch Serverless saved ~$50/month of idle cost — the
+  single biggest cost decision. S3 Vectors trades ultra-low latency for cost;
+  fine for internal Q&A.
+- Service role (not user credentials) grants the KB access to S3 + Titan +
+  vector index — least privilege in practice.
+- Teardown order matters: delete the Knowledge Base BEFORE the S3 Vectors
+  bucket, or the vector store can be left dangling.

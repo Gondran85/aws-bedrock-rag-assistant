@@ -41,5 +41,11 @@
 - **HTTP 429 "Too many requests" is rate limiting, not access denial.** Initial sync failed because new accounts have low default Bedrock throughput quotas; the sync's burst on the Titan embedding model exceeded them.
 - **Diagnosis discipline by status code:** 403 = permission (fix IAM), 429 = rate (retry / raise quota), 400 = malformed request. Reading the code first avoids debugging the wrong layer — e.g., rewriting a perfectly correct IAM policy to fix a rate problem.
 - **Fix: re-run Sync.** Throttling is transient.
+Phase 6 (cont.) — Root cause: account-level quota = 0 (provisioning bug)
 
-<!-- Next phases append below -->
+
+The 429 was not a burst problem — it was a provisioning bug. Checked Service Quotas for Bedrock: every on-demand embeddings model (Titan V2, Titan G1, Titan/Nova Multimodal) showed Applied account-level quota value = 0 while the AWS default is 2,000–6,000 RPM and 300,000 TPM. Quota 0 means every InvokeModel call is rejected, regardless of payload size.
+Why batching would have wasted effort: splitting the ingestion into one file at a time only reduces burst size. Against a quota of 0, one chunk fails exactly like one hundred. Verifying the quota first prevented pointless manual work.
+Why switching embedding models would not help: the zero quota is account-wide across all embedding models, not specific to Titan V2.
+Diagnosis ladder for Bedrock 429: (1) read the status code — 403=permission, 429=rate, 400=bad request; (2) check Service Quotas → Applied value; (3) if Applied is a normal number, it is real burst → retry with exponential backoff + jitter, or use cross-Region inference profiles; (4) if Applied is 0 and "Not adjustable", it is an account provisioning issue → wait for auto-initialization or open an AWS Support case.
+Production-grade mitigations to cite: exponential backoff with jitter on the client (the Lambda will implement this), and cross-Region inference profiles to spread load across Regions.

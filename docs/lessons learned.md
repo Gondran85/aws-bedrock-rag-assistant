@@ -26,3 +26,11 @@
   vector index — least privilege in practice.
 - Teardown order matters: delete the Knowledge Base BEFORE the S3 Vectors
   bucket, or the vector store can be left dangling.
+  ## Phase 6 — First sync: 429 throttling (not a permissions error)
+- Initial sync failed with HTTP 429 "Too many requests" on the Titan embedding
+  model. This is RATE LIMITING, not access denial. New accounts have low
+  default Bedrock throughput quotas; the sync's burst exceeded them.
+- Diagnosis discipline: 403 = permission (fix IAM), 429 = rate (retry/raise
+  quota), 400 = malformed request. Reading the status code first avoids
+  debugging the wrong layer.
+- Fix: re-run Sync. Throttling is transient.

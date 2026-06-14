@@ -51,3 +51,16 @@
 - **Why switching embedding models would not help:** the zero quota is account-wide across all embedding models, not specific to Titan V2.
 - **Diagnosis ladder for Bedrock 429:** (1) read the status code — 403=permission, 429=rate, 400=bad request; (2) check Service Quotas → Applied value; (3) if Applied is a normal number, it is real burst → retry with exponential backoff + jitter, or use cross-Region inference profiles; (4) if Applied is 0 and "Not adjustable", it is an account provisioning issue → wait for auto-initialization or open an AWS Support case.
 - **Production-grade mitigations to cite:** exponential backoff with jitter on the client (the Lambda will implement this), and cross-Region inference profiles to spread load across Regions.
+
+## Phase 6 (resolved) — The real cause was a DAILY token limit, not a provisioning bug
+
+- **The decisive clue was the exact error string.** Earlier failures said "Too many requests" (per-minute). The playground later returned **"Too many tokens per day"** — a different, daily quota applied to new / free-tier Bedrock accounts.
+- **The diagnosis trap:** the per-minute quota in Service Quotas showed Applied = 0, which looked like a provisioning bug. But the *operative* limit was a per-DAY token cap that does not appear in the Service Quotas screen. Chasing the per-minute quota was debugging the wrong limit.
+- **Self-inflicted exhaustion:** every failed sync, retry, and playground test consumed the daily token budget. By the time the daily limit surfaced, the day's allowance was already spent on diagnosis attempts.
+- **Two Bedrock limit types — do not confuse them:**
+  | Limit | Error message | Reset window | In Service Quotas? |
+  |---|---|---|---|
+  | Per-minute (RPM/TPM) | "Too many requests" | seconds | Yes |
+  | Per-day (new/free-tier account) | "Too many tokens per day" | ~24h (UTC) | No (not directly) |
+- **Fix:** wait for the daily reset (~24h, UTC). Next day, run a SINGLE sync — do not burn the daily allowance on retries/tests first. The 4 small PDFs fit within the daily cap if the budget is not wasted beforehand.
+- **Lesson:** read the literal error string before theorizing. "per minute" vs "per day" points to entirely different limits and entirely different fixes.

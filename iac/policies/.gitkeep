@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "WriteHistoryToDynamoDB",
+      "Effect": "Allow",
+      "Action": "dynamodb:PutItem",
+      "Resource": "arn:aws:dynamodb:us-east-1:<ACCOUNT_ID>:table/acme-rag-history"
+    },
+    {
+      "Sid": "QueryKnowledgeBase",
+      "Effect": "Allow",
+      "Action": "bedrock:RetrieveAndGenerate",
+      "Resource": "*"
+    },
+    {
+      "Sid": "InvokeModelForGeneration",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:Retrieve"],
+      "Resource": "*"
+    }
+  ]
+}

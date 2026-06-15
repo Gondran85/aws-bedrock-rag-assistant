@@ -124,9 +124,19 @@ def _save_history(question, answer_obj):
         print(f"[WARN] Could not write history to DynamoDB: {e}")
 
 
+def _http_method(event):
+    """
+    Get the HTTP method regardless of API Gateway payload version.
+    HTTP API (payload v2) -> event['requestContext']['http']['method']
+    REST API (payload v1) -> event['httpMethod']
+    """
+    v2 = event.get("requestContext", {}).get("http", {}).get("method")
+    return v2 or event.get("httpMethod")
+
+
 def lambda_handler(event, context):
-    # Handle CORS preflight from the browser.
-    if event.get("httpMethod") == "OPTIONS":
+    # Handle CORS preflight from the browser (works for v1 and v2).
+    if _http_method(event) == "OPTIONS":
         return _response(200, {"ok": True})
 
     question = _extract_question(event)

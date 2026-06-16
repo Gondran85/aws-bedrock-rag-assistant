@@ -12,3 +12,7 @@
 | 6 | **us-east-1** region | Local region (me-central-1) | Broadest Bedrock model catalog and guaranteed S3 Vectors availability |
 | 7 | **English** for all repo artifacts | Portuguese | International market reach; consistent with portfolio convention (`cloudops-finance`) |
 | 8 | **Terminate** leftover resources from previous project | Keep instances stopped | Stopped EC2 still bills for EBS volumes and public IPs; recreating a study instance takes minutes |
+| 9 | Lambda (Python) as backend | Front-end calling Bedrock directly / Function URL | Keeps AWS credentials off the client, orchestrates the RAG call, handles errors and history; API Gateway adds the professional control layer |
+| 10 | DynamoDB for history | RDS (SQL) | Records are independent key-based items, no complex joins; on-demand NoSQL is cheaper and zero-maintenance for this access pattern |
+| 11 | HTTP API (API Gateway) | REST API | Lower cost and simpler; project needs only Lambda proxy + CORS, not REST API advanced features |
+| 12 | CORS handled by the Lambda (Gateway CORS cleared) | Gateway-managed CORS | Gateway CORS conflicted with the explicit OPTIONS route and returned 204 without the Allow-Origin header; letting the Lambda own CORS is explicit and debuggable |

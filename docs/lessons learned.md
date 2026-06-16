@@ -64,3 +64,12 @@
   | Per-day (new/free-tier account) | "Too many tokens per day" | ~24h (UTC) | No (not directly) |
 - **Fix:** wait for the daily reset (~24h, UTC). Next day, run a SINGLE sync — do not burn the daily allowance on retries/tests first. The 4 small PDFs fit within the daily cap if the budget is not wasted beforehand.
 - **Lesson:** read the literal error string before theorizing. "per minute" vs "per day" points to entirely different limits and entirely different fixes.
+
+## Phase 7 — API Gateway (HTTP API) and the CORS saga
+
+- **Chose HTTP API over REST API:** lower cost, simpler; the project only needs Lambda proxy + CORS, not REST API's advanced features (API keys, usage plans, request validation).
+- **CSP is not CORS.** The first "NetworkError" came from running the fetch test inside an AWS Console tab — the Console's Content-Security-Policy blocks requests to non-allowlisted endpoints. That was the *page* blocking the call, not the API. Lesson: never test an external API from a tab that has a strict CSP.
+- **Testing CORS requires a REAL origin.** Testing from `about:blank` reports origin `null`, which `*` does not reliably cover on preflight — it produced false CORS failures. Testing from a real origin (https://example.com) gave a clean result.
+- **The real fix — one source of CORS, not two.** Having CORS configured on the API Gateway AND an OPTIONS route to the Lambda made them conflict: the Gateway intercepted the preflight and returned 204 without the Access-Control-Allow-Origin header, and (per AWS) "API Gateway ignores CORS headers returned from the integration" when Gateway CORS is set. Solution: Clear CORS on the Gateway, keep an explicit OPTIONS /query route pointing to the Lambda, and let the Lambda return the CORS headers itself.
+- **HTTP API payload v2 vs v1.** The Lambda must read the method from `event.requestContext.http.method` (v2), not `event.httpMethod` (v1). With the wrong path, the OPTIONS preflight was never detected by the function.
+- **Diagnosis ladder for a failing browser→API call:** (1) is the page's CSP blocking it? (test from a neutral/real origin); (2) is the origin `null`? (use a real origin); (3) does the preflight (OPTIONS) return the Access-Control-Allow-Origin header? (4) is CORS configured in two places fighting each other?

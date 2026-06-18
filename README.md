@@ -4,10 +4,20 @@
 
 [![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/)
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon-Bedrock-232F3E?logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/bedrock/)
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Serverless](https://img.shields.io/badge/Architecture-Serverless-FD5750?logo=serverless&logoColor=white)](https://aws.amazon.com/serverless/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-In%20Progress-blue)](#-project-phases)
+[![Status](https://img.shields.io/badge/Status-Live%20(mock%20mode)-success)](#-live-demo)
+
+---
+
+## 🚀 Live demo
+
+**[Try it live →](http://acme-rag-frontend-jeff-2026.s3-website-us-east-1.amazonaws.com)** — ask a question and get an answer grounded in the source documents, with citations.
+
+![Acme RAG Assistant — live demo](screenshots/app-demo.png)
+
+> **Currently running in mock mode** while the account-level Amazon Bedrock token quota is being provisioned (a known limitation on new accounts — AWS Support case open). The full RAG pipeline is built and wired end to end: S3 → Bedrock Knowledge Base → Titan embeddings → S3 Vectors → Lambda → API Gateway → front-end. Switching from simulated to live answers is a single environment-variable change (`MOCK_MODE=false`).
 
 ---
 
@@ -23,7 +33,7 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 
 **Cloud (AWS):** Amazon Bedrock (Knowledge Bases · Guardrails) · Amazon S3 · Amazon S3 Vectors · AWS Lambda · Amazon API Gateway · Amazon DynamoDB · AWS IAM · Amazon CloudWatch · AWS CloudTrail · AWS Budgets
 
-**Application:** Python 3.12 · boto3 · HTML5 · CSS3 · JavaScript (vanilla)
+**Application:** Python 3.14 · boto3 · HTML5 · CSS3 · JavaScript (vanilla)
 
 **Tooling:** Bash · Git · Mermaid · draw.io
 
@@ -109,17 +119,21 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 | 1 | Use case, requirements and architecture | ✅ Done |
 | 2 | Account hardening, IAM, cost guardrails | ✅ Done |
 | 3 | Document storage (S3) | ✅ Done |
-| 4 | Data preparation and ingestion | 🔄 In progress |
-| 5 | Knowledge Base + S3 Vectors + Guardrails | ⏳ Planned |
-| 6 | Backend — Lambda + API Gateway | ⏳ Planned |
-| 7 | Front-end + full integration | ⏳ Planned |
-| 8 | Observability, testing, teardown | ⏳ Planned |
+| 4 | Data preparation and ingestion | 🔄 Built — awaiting account quota |
+| 5 | Knowledge Base + S3 Vectors + Guardrails | ✅ Done |
+| 6 | Backend — Lambda + API Gateway | ✅ Done |
+| 7 | Front-end + full integration | ✅ Done |
+| 8 | Observability, testing, teardown | ⏳ In progress |
+
+> **Phase 4 note:** ingestion is fully configured but blocked by a new-account Bedrock token quota (HTTP 429), not a design or permissions issue. The app runs in mock mode meanwhile; see [docs/lessons-learned.md](docs/lessons-learned.md) for the full diagnosis.
 
 ---
 
 ## 📸 Evidence
 
-Screenshots are added to [`screenshots/`](screenshots/) at the end of each phase.
+![Acme RAG Assistant running on S3 static hosting](screenshots/app-demo.png)
+
+*The live application served from Amazon S3, answering a policy question with source citations (mock mode).* Additional screenshots in [`screenshots/`](screenshots/).
 
 ---
 

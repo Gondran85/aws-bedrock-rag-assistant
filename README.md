@@ -13,7 +13,7 @@
 
 ## 🚀 Live demo
 
-**[Try it live →](http://acme-rag-frontend-jeff-2026.s3-website-us-east-1.amazonaws.com)** — ask a question and get an answer grounded in the source documents, with citations.
+**[Try it live →](http://acme-rag-frontend-jeff-2026.s3-website-us-east-1.amazonaws.com)** — a fully functional end-to-end UI (front-end → API Gateway → Lambda → response). It currently returns **simulated answers with static citations** while the real RAG pipeline awaits account quota; see the note below.
 
 ![Acme RAG Assistant — live demo](screenshots/app-demo.png)
 
@@ -23,7 +23,7 @@
 
 ## 📋 About the project
 
-**Acme RAG Assistant** is a web application where employees ask questions in natural language and receive answers **grounded in the company's internal documents** (HR policies), with source citations. The goal is not the app itself — it is to demonstrate a **professional GenAI architecture**: managed RAG with Amazon Bedrock Knowledge Bases, low-cost vector storage with Amazon S3 Vectors, runtime safety with Bedrock Guardrails, and strict cost governance.
+**Acme RAG Assistant** is a web application where employees ask questions in natural language and receive answers **grounded in the company's internal documents** (HR policies), with source citations. The goal is not the app itself — it is to demonstrate a **professional GenAI architecture**: managed RAG with Amazon Bedrock Knowledge Bases, low-cost vector storage with Amazon S3 Vectors, and strict cost governance. Runtime safety with Bedrock Guardrails is designed and planned (see [Roadmap](#-roadmap--not-yet-built)).
 
 ### 🎯 Simulated business problem
 
@@ -31,7 +31,7 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 
 ### 🛠️ Technologies and services
 
-**Cloud (AWS):** Amazon Bedrock (Knowledge Bases · Guardrails) · Amazon S3 · Amazon S3 Vectors · AWS Lambda · Amazon API Gateway · Amazon DynamoDB · AWS IAM · Amazon CloudWatch · AWS CloudTrail · AWS Budgets
+**Cloud (AWS):** Amazon Bedrock (Knowledge Bases · Guardrails *planned*) · Amazon S3 · Amazon S3 Vectors · AWS Lambda · Amazon API Gateway · Amazon DynamoDB · AWS IAM · Amazon CloudWatch · AWS CloudTrail · AWS Budgets
 
 **Application:** Python 3.14 · boto3 · HTML5 · CSS3 · JavaScript (vanilla)
 
@@ -44,7 +44,7 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 📄 Full diagram and request flow in [docs/architecture.md](docs/architecture.md) · Every design choice justified in [docs/decision-log.md](docs/decision-log.md)
 
 - **Ingestion path:** documents stored in S3 (SSE-S3 encryption, versioning, Block Public Access) → Bedrock Knowledge Base → Titan Text Embeddings → S3 Vectors index
-- **Query path:** static web front-end → API Gateway → Lambda (Python) → Bedrock `RetrieveAndGenerate` (Amazon Nova Lite) → Guardrails → answer **with source citations**
+- **Query path:** static web front-end → API Gateway → Lambda (Python) → Bedrock `RetrieveAndGenerate` (Amazon Nova Lite) → answer **with source citations** *(Guardrails to be inserted at this step — planned)*
 - **State:** DynamoDB stores question history
 - **Observability:** CloudWatch logs and metrics · CloudTrail audit trail
 - **Cost governance:** AWS Budgets (USD 5 cap, layered alerts at 50/80/100%) · cost-allocation tags on every resource
@@ -70,9 +70,9 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 ✅ **Least-privilege IAM roles** — no access keys in code, ever
 ✅ **S3 Block Public Access** on the documents bucket (all four settings on)
 ✅ **Encryption at rest** (SSE-S3) + **bucket versioning**
-✅ **Bedrock Guardrails** — content filtering at runtime
 ✅ **CloudTrail** auditing all management events
 ✅ **AWS Budgets** with layered alerts (50% / 80% actual, 100% forecasted)
+🔲 **Bedrock Guardrails** — content filtering at runtime *(planned — applies once the model is called in live mode)*
 
 ---
 
@@ -83,7 +83,7 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 | **Grounding** | Answers are restricted to retrieved document chunks (RAG) |
 | **Transparency** | Every answer returns its source citations |
 | **Refusal over hallucination** | Out-of-scope questions return "not in the knowledge base" — never an invented answer |
-| **Safety** | Guardrails enforce denied topics and content filters at runtime |
+| **Safety** | Guardrails (denied topics + content filters at runtime) — **designed, not yet configured**; activates in live mode |
 
 ---
 
@@ -92,7 +92,7 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 | Pillar | How it is applied in this project |
 |---|---|
 | **Operational Excellence** | CloudWatch logs/metrics, CloudTrail, version-controlled docs and code |
-| **Security** | Least-privilege IAM, Block Public Access, SSE-S3, Guardrails |
+| **Security** | Least-privilege IAM, Block Public Access, SSE-S3 (Guardrails planned) |
 | **Reliability** | Fully managed services (Bedrock, Lambda, DynamoDB) — no servers to fail |
 | **Performance Efficiency** | Right-sized FM (Nova Lite), serverless auto-scaling |
 | **Cost Optimization** | S3 Vectors over OpenSearch Serverless (~90% cheaper), Budgets, cost tags |
@@ -119,13 +119,13 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 | 1 | Use case, requirements and architecture | ✅ Done |
 | 2 | Account hardening, IAM, cost guardrails | ✅ Done |
 | 3 | Document storage (S3) | ✅ Done |
-| 4 | Data preparation and ingestion | 🔄 Built — awaiting account quota |
-| 5 | Knowledge Base + S3 Vectors + Guardrails | ✅ Done |
+| 4 | Data preparation and ingestion | 🔄 Configured — awaiting account quota |
+| 5 | Knowledge Base + S3 Vectors (created; not yet populated) | 🔄 Built — depends on Phase 4 ingestion |
 | 6 | Backend — Lambda + API Gateway | ✅ Done |
 | 7 | Front-end + full integration | ✅ Done |
-| 8 | Observability, testing, teardown | ⏳ In progress |
+| 8 | Guardrails, observability, testing, teardown | ⏳ In progress |
 
-> **Phase 4 note:** ingestion is fully configured but blocked by a new-account Bedrock token quota (HTTP 429), not a design or permissions issue. The app runs in mock mode meanwhile; see [docs/lessons-learned.md](docs/lessons-learned.md) for the full diagnosis.
+> **Phases 4–5 note:** the Knowledge Base and S3 Vectors index are created and configured, but ingestion is blocked by a new-account Bedrock token quota (HTTP 429) — not a design or permissions issue. Until ingestion completes, the KB holds no searchable content and the app runs in mock mode. Guardrails configuration is part of Phase 8 (not yet built). Full diagnosis in [docs/lessons-learned.md](docs/lessons-learned.md).
 
 ---
 
@@ -143,8 +143,14 @@ Updated at the end of every phase — see [docs/lessons-learned.md](docs/lessons
 
 ---
 
-## 🔮 Future improvements
+## 🔮 Roadmap — not yet built
 
+**Next (committed scope):**
+- [ ] **Bedrock Guardrails** — denied topics + content filters, attached to the `RetrieveAndGenerate` call (Phase 8)
+- [ ] Complete Knowledge Base ingestion once the account quota is provisioned, then switch `MOCK_MODE=false`
+- [ ] CloudWatch dashboards + alarms; documented teardown
+
+**Later (stretch):**
 - [ ] Bedrock **Agents** with Action Groups (ticket creation)
 - [ ] **Amazon Cognito** for real user authentication
 - [ ] Infrastructure as Code with **Terraform**

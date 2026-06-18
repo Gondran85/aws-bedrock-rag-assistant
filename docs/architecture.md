@@ -1,4 +1,5 @@
 # 🏛️ Architecture
+> **Note:** This document describes the *target* architecture (design intent). For the current build status of each component — e.g. **Guardrails (planned)**, and ingestion **awaiting account quota** — see the [project phases in the README](../README.md#-project-phases).
 
 ## Diagram
 

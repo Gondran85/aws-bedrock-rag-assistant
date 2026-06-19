@@ -131,9 +131,46 @@ Acme Corp's HR team answers the same policy questions every day. The documents e
 
 ## 📸 Evidence
 
+Screenshots are organized by build phase and live in [`screenshots/`](screenshots/). Each file is named `phase<N>-<resource>.png`, so the gallery maps directly to the [project phases](#-project-phases) above.
+
+**Live application (mock mode)**
+
 ![Acme RAG Assistant running on S3 static hosting](screenshots/app-demo.png)
 
-*The live application served from Amazon S3, answering a policy question with source citations (mock mode).* Additional screenshots in [`screenshots/`](screenshots/).
+*The live UI served from Amazon S3, answering a policy question with source citations.*
+
+<details>
+<summary><b>Phase 3 — Document storage (S3)</b></summary>
+
+![S3 bucket created](screenshots/phase3-s3-bucket-created.png)
+![HR documents uploaded to S3](screenshots/phase3-s3-hr-documents-uploaded.png)
+![S3 bucket policy](screenshots/phase3-s3-bucket-policy.png)
+
+</details>
+
+<details>
+<summary><b>Phase 5 — Knowledge Base</b></summary>
+
+![Bedrock Knowledge Base created](screenshots/phase5-knowledge-base-created.png)
+
+</details>
+
+<details>
+<summary><b>Phase 6 — Backend (Lambda · IAM · DynamoDB)</b></summary>
+
+![Lambda function created](screenshots/phase6-lambda-created.png)
+![Lambda IAM policy](screenshots/phase6-lambda-iam-policy.png)
+![DynamoDB table created](screenshots/phase6-dynamodb-created.png)
+
+</details>
+
+<details>
+<summary><b>Phase 7 — API Gateway &amp; integration</b></summary>
+
+![API Gateway (HTTP API) created](screenshots/phase7-api-gateway-created.png)
+![End-to-end mock test (no Bedrock call)](screenshots/phase7-mock-test.png)
+
+</details>
 
 ---
 

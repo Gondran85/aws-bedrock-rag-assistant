@@ -18,7 +18,11 @@ flowchart LR
     L -.logs.-> CW[📈 CloudWatch]
     ACC[💳 AWS Account] -.USD 5 alert.-> BUD[🔔 AWS Budgets]
 ```
+### Visual analogy
 
+For an intuitive view, the system maps to a library:
+
+![Library analogy](../diagrams/acme_rag_library_analogy.png)
 ## Request flow
 
 1. **Documents enter the system** — HR PDFs are uploaded to a private S3 bucket (SSE-S3 encryption, versioning, Block Public Access on)

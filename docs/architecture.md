@@ -22,7 +22,7 @@ flowchart LR
 
 For an intuitive view, the system maps to a library:
 
-![Library analogy](../diagrams/acme_rag_library_analogy_en)
+![Library analogy](../diagrams/acme_rag_library_analogy_en.png)
 ## Request flow
 
 1. **Documents enter the system** — HR PDFs are uploaded to a private S3 bucket (SSE-S3 encryption, versioning, Block Public Access on)
